@@ -1,0 +1,27 @@
+{
+  "id": "claude-realm",
+  "version": "0.1.0",
+  "name": "Claude Code + Agent Vault",
+  "description": "Installs Claude Code and the Agent Vault client, and replaces `claude` with a shim that routes all traffic through Agent Vault so credentials (e.g. the Anthropic key) are injected at the proxy boundary and never live in the container.",
+  "options": {
+    "claudeVersion": {
+      "type": "string",
+      "default": "latest",
+      "description": "npm dist-tag or version of @anthropic-ai/claude-code to install."
+    },
+    "agentVaultVersion": {
+      "type": "string",
+      "default": "0.21.1",
+      "description": "Version of the agent-vault client to install (GitHub release without the leading v). Must be compatible with your Agent Vault server's proxy protocol; newer clients may be rejected by older servers."
+    },
+    "authMode": {
+      "type": "string",
+      "enum": ["oauth", "apikey"],
+      "default": "oauth",
+      "description": "How Claude Code authenticates to Anthropic through the proxy. 'oauth' uses CLAUDE_CODE_OAUTH_TOKEN (Authorization: Bearer); 'apikey' uses ANTHROPIC_API_KEY (x-api-key). Match your vault's anthropic service credential."
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/node"
+  ]
+}
