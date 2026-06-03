@@ -14,7 +14,13 @@
     "AGENT_VAULT_VAULT": "${localEnv:AGENT_VAULT_VAULT}"
   },
   "//": "host.docker.internal is built-in on Docker Desktop/OrbStack but NOT on native Linux Docker; map it to the host gateway so the vault (AGENT_VAULT_ADDR=host.docker.internal:14321) is reachable on both.",
-  "runArgs": ["--add-host=host.docker.internal:host-gateway"],
-  "forwardPorts": [3000],
-  "postCreateCommand": "agent-vault vault discover --json || echo 'agent-vault not yet configured (set AGENT_VAULT_* env)'"
+  "runArgs": [
+    "--add-host=host.docker.internal:host-gateway"
+  ],
+  "forwardPorts": [
+    3000
+  ],
+  "postCreateCommand": "agent-vault vault discover --json || echo 'agent-vault not yet configured (set AGENT_VAULT_* env)'",
+  "remoteUser": "node",
+  "updateRemoteUserUID": true
 }
