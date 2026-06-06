@@ -6,6 +6,9 @@
       "claudeVersion": "latest",
       "agentVaultVersion": "0.21.1",
       "authMode": "oauth"
+    },
+    "./features/code-server": {
+      "version": "4.96.4"
     }
   },
   "remoteEnv": {
@@ -19,5 +22,7 @@
   "remoteUser": "node",
   "updateRemoteUserUID": true,
   "forwardPorts": [3000],
-  "postCreateCommand": "agent-vault vault discover --json || echo 'agent-vault not yet configured (set AGENT_VAULT_* env)'"
+  "postCreateCommand": "agent-vault vault discover --json || echo 'agent-vault not yet configured (set AGENT_VAULT_* env)'",
+  "//postStartCommand": "start code-server (browser VS Code) on the container loopback; reached only through the realm port-forward tunnel. Idempotent across restarts.",
+  "postStartCommand": "/usr/local/bin/realm-code-server-start"
 }

@@ -1,0 +1,16 @@
+{
+  "id": "code-server",
+  "version": "0.1.0",
+  "name": "code-server (browser VS Code)",
+  "description": "Installs code-server (browser VS Code) and an idempotent start script. The realm template starts it bound to the container loopback (127.0.0.1:8888); it is reached only through the realm port-forward tunnel, so it runs with --auth none and is never exposed.",
+  "options": {
+    "version": {
+      "type": "string",
+      "default": "4.96.4",
+      "description": "code-server release version to install (without leading v). Bump to current stable as needed."
+    }
+  },
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/node"
+  ]
+}
