@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Seed Claude Code interactive state so `claude` (TUI) skips first-run onboarding/login and the
+# folder-trust prompt — the agent-vault proxy supplies auth on the wire (like `claude -p`). No
+# secret is written; these are UX-state flags only.
+# Arg 1 = workspace dir to pre-trust (default: current dir). Idempotent; MERGES, never clobbers.
+set -euo pipefail
+DIR="${1:-$PWD}"
+node -e '
+  const fs = require("fs"), os = require("os");
+  const p = os.homedir() + "/.claude.json";
+  let d = {};
+  try { d = JSON.parse(fs.readFileSync(p, "utf8")); } catch (e) {
+    if (e.code !== "ENOENT") process.stderr.write("[realm-claude-init] warn: ~/.claude.json unreadable/malformed, resetting\n");
+  }
+  d.hasCompletedOnboarding = true;
+  d.projects = d.projects || {};
+  d.projects[process.argv[1]] = Object.assign({}, d.projects[process.argv[1]], { hasTrustDialogAccepted: true });
+  fs.writeFileSync(p, JSON.stringify(d, null, 2));
+' "$DIR"

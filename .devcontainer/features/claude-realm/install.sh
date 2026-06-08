@@ -60,4 +60,10 @@ EOF
 fi
 chmod +x "$DIR/claude"
 
+# 4. claude interactive onboarding seeder ------------------------------------
+# Installs realm-claude-init; the template's postCreateCommand runs it (as the remote user) to
+# seed ~/.claude.json so interactive `claude` skips onboarding/login + the folder-trust prompt.
+log "installing realm-claude-init"
+install -m 0755 "$(dirname "$0")/realm-claude-init" /usr/local/bin/realm-claude-init
+
 log "done (claude -> agent-vault run -> claude-real)"
