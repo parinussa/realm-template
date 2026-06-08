@@ -1,6 +1,6 @@
 {
   "id": "claude-realm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "Claude Code + Agent Vault",
   "description": "Installs Claude Code and the Agent Vault client, and replaces `claude` with a shim that routes all traffic through Agent Vault so credentials (e.g. the Anthropic key) are injected at the proxy boundary and never live in the container.",
   "options": {
