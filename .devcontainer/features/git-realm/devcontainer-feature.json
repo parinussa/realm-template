@@ -1,0 +1,11 @@
+{
+  "id": "git-realm",
+  "version": "0.1.0",
+  "name": "git via Agent Vault",
+  "description": "Replaces `git` with a shim that routes network git operations (clone/fetch/pull/push/ls-remote) through Agent Vault, so per-host git credentials are injected at the proxy boundary and never live in the container. Local git ops bypass the broker.",
+  "options": {
+    "agentVaultVersion": { "type": "string", "default": "0.21.1",
+      "description": "agent-vault client version to install if not already present." }
+  },
+  "installsAfter": ["ghcr.io/parinussa/realm-features/claude-realm"]
+}
