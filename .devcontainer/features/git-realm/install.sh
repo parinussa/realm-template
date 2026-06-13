@@ -24,23 +24,33 @@ if ! command -v agent-vault >/dev/null 2>&1; then
 fi
 
 # git shim --------------------------------------------------------------------
+# The real git is moved to a dir OFF $PATH but keeps basename `git`: git's own dispatch
+# treats an invocation named `git-<x>` as the subcommand <x> ("git-real" -> "cannot handle
+# real as a builtin"), so it must NOT be renamed with a `git-` prefix.
 log "installing git shim"
 REAL="$(command -v git)"
 DIR="$(dirname "$REAL")"
-mv "$REAL" "$DIR/git-real"
+REAL_DIR="/usr/local/lib/git-realm"
+mkdir -p "$REAL_DIR"
+mv "$REAL" "$REAL_DIR/git"
 cat > "$DIR/git" <<'EOF'
 #!/bin/sh
 # Route NETWORK git ops through agent-vault so the git-host PAT is injected at the proxy.
 # Local ops (status/commit/log/diff/...) bypass the broker — no round-trip, work offline.
-[ -n "$AGENT_VAULT_GIT_WRAPPED" ] && exec git-real "$@"
+[ -n "$AGENT_VAULT_GIT_WRAPPED" ] && exec /usr/local/lib/git-realm/git "$@"
 export GIT_TERMINAL_PROMPT=0
 case "$1" in
   clone|fetch|pull|push|ls-remote)
-    # agent-vault's MITM proxy intercepts HTTP/1.1 only; pin git to it so an HTTP/2
-    # negotiation can't bypass credential injection.
-    AGENT_VAULT_GIT_WRAPPED=1 exec agent-vault run -- git-real -c http.version=HTTP/1.1 "$@" ;;
-  *) exec git-real "$@" ;;
+    # Run git under agent-vault (injects the PAT). The inner `sh -c` evaluates $GIT_SSL_CAINFO
+    # AFTER agent-vault run has set it to the broker's MITM CA. Trust that CA for BOTH the
+    # remote (sslCAInfo) AND the HTTPS proxy (proxySSLCAInfo — git verifies the proxy cert
+    # against the system store otherwise). Pin HTTP/1.1 so the MITM can intercept (HTTP/2
+    # would be forwarded un-injected).
+    AGENT_VAULT_GIT_WRAPPED=1 exec agent-vault run -- sh -c \
+      'exec /usr/local/lib/git-realm/git -c http.version=HTTP/1.1 -c http.sslCAInfo="$GIT_SSL_CAINFO" -c http.proxySSLCAInfo="$GIT_SSL_CAINFO" "$@"' \
+      sh "$@" ;;
+  *) exec /usr/local/lib/git-realm/git "$@" ;;
 esac
 EOF
 chmod +x "$DIR/git"
-log "done (git -> agent-vault run -> git-real for network ops)"
+log "done (git -> agent-vault run -> real git for network ops)"
